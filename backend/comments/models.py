@@ -5,7 +5,7 @@ from django.db.models import CASCADE
 from django.utils.translation import gettext as _
 
 from comments.utils import comment_image_file_path, comment_text_file_path, resize_image
-from comments.validators import XHTMLValidator, validate_file_size
+from comments.validators import xhtml_validator, validate_file_size
 
 
 class Comment(models.Model):
@@ -16,7 +16,7 @@ class Comment(models.Model):
     )
     text = models.TextField(
         _("text"),
-        validators=[XHTMLValidator()])
+        validators=[xhtml_validator])
     user = models.ForeignKey(
         get_user_model(),
         on_delete=CASCADE,
