@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     # 3rd party
     "rest_framework",
     "rest_framework_simplejwt",
+    #my_apps
+    "comments",
+    "accounts"
 ]
 
 MIDDLEWARE = [
