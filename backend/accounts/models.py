@@ -1,13 +1,12 @@
 import os
 import uuid
 
-from accounts.validators import username_validator
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 
-from accounts.managers import UserManager
+from accounts.validators import username_validator
 
 
 def user_image_profile_file_path(instance, filename) -> os.path:
