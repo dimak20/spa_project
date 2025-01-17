@@ -25,8 +25,18 @@ class User(AbstractUser):
         validators=[username_validator]
     )
     email = models.EmailField(_("email address"), unique=True)
-    first_name = models.CharField(_("first name"), max_length=150, blank=False)
-    last_name = models.CharField(_("last name"), max_length=150, blank=False)
+    first_name = models.CharField(
+        _("first name"),
+        max_length=150,
+        blank=True,
+        null=True
+    )
+    last_name = models.CharField(
+        _("last name"),
+        max_length=150,
+        blank=True,
+        null=True
+    )
     bio = models.TextField(_("bio"), max_length=1000, null=True, blank=True)
     data_joined = models.DateTimeField(auto_now_add=True)
     profile_image = models.ImageField(
