@@ -24,4 +24,5 @@ from django.urls.conf import include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/accounts/", include("accounts.urls", namespace="accounts")),
+    path("api/v1/comments/", include("comments.urls", namespace="comments")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
