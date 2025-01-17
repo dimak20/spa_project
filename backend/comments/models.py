@@ -58,7 +58,7 @@ class Comment(models.Model):
         null=True
     )
     parent = models.ForeignKey(
-        'self',
+        "self",
         on_delete=models.CASCADE,
         related_name="replies",
         blank=True,
