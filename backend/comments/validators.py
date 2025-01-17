@@ -1,11 +1,14 @@
 import re
-from django.core.exceptions import ValidationError
 from html import unescape
 
-ALLOWED_TAGS = ["a", "code", "i", "strong"]
+from django.core.exceptions import ValidationError
 
+ALLOWED_TAGS = ["a", "code", "i", "strong"]
+MAX_SIZE_KB = 100  # Max size (In Kilobytes!)
 
 class XHTMLValidator:
+    """Checks the comment text for prohibited tags"""
+
     def __init__(self, allowed_tags=None):
         self.allowed_tags = allowed_tags or ALLOWED_TAGS
 
@@ -30,3 +33,11 @@ class XHTMLValidator:
             value_unescaped = unescape(value)
         except Exception as e:
             raise ValidationError(f"Error in XHTML markup: {e}")
+
+
+def validate_file_size(value):
+    """Checks the size of the downloaded file."""
+    if value.size > MAX_SIZE_KB * 1024:
+        raise ValidationError(
+            f"The file size cannot exceed {MAX_SIZE_KB}KB."
+        )
