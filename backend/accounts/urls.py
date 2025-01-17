@@ -9,7 +9,7 @@ from accounts.views import (
     CreateUserView
 )
 
-app_name = "users"
+app_name = "accounts"
 
 urlpatterns = [
     path("register/", CreateUserView.as_view(), name="create"),
