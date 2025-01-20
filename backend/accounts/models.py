@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import gettext as _
 
 from accounts.utils import user_image_profile_file_path
-from accounts.validators import username_validator
+from accounts.validators import username_validator, validate_avatar_size
 
 
 class User(AbstractUser):
@@ -31,6 +31,10 @@ class User(AbstractUser):
     profile_image = models.ImageField(
         upload_to=user_image_profile_file_path,
         null=True,
-        blank=True
+        blank=True,
+        validators=[
+            validate_avatar_size
+        ]
     )
     USERNAME_FIELD = "username"
+
