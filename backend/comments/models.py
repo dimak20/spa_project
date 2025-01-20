@@ -9,53 +9,29 @@ from comments.validators import xhtml_validator, validate_file_size
 
 
 class Comment(models.Model):
-    home_page = models.URLField(
-        _("home page"),
-        blank=True,
-        null=True
-    )
-    text = models.TextField(
-        _("text"),
-        validators=[xhtml_validator])
+    home_page = models.URLField(_("home page"), blank=True, null=True)
+    text = models.TextField(_("text"), validators=[xhtml_validator])
     user = models.ForeignKey(
-        get_user_model(),
-        on_delete=CASCADE,
-        related_name="comments"
+        get_user_model(), on_delete=CASCADE, related_name="comments"
     )
-    created_at = models.DateTimeField(
-        _("created at"),
-        auto_now_add=True
-    )
-    updated_at = models.DateTimeField(
-        _("updated at"),
-        auto_now=True
-    )
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("updated at"), auto_now=True)
     attached_image = models.ImageField(
         _("attached image"),
         upload_to=comment_image_file_path,
-        validators=[
-            FileExtensionValidator(
-                allowed_extensions=[
-                    "jpg", "gif", "png"
-                ]
-            )
-        ],
+        validators=[FileExtensionValidator(allowed_extensions=["jpg", "gif", "png"])],
         blank=True,
-        null=True
+        null=True,
     )
     attached_file = models.FileField(
         _("attached file"),
         upload_to=comment_text_file_path,
         validators=[
-            FileExtensionValidator(
-                allowed_extensions=[
-                    "txt"
-                ]
-            ),
-            validate_file_size
+            FileExtensionValidator(allowed_extensions=["txt"]),
+            validate_file_size,
         ],
         blank=True,
-        null=True
+        null=True,
     )
     parent = models.ForeignKey(
         "self",
@@ -63,7 +39,7 @@ class Comment(models.Model):
         related_name="replies",
         blank=True,
         null=True,
-        verbose_name=_("parent comment")
+        verbose_name=_("parent comment"),
     )
 
     def __str__(self):
