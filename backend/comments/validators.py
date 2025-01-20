@@ -30,6 +30,4 @@ def xhtml_validator(value):
 def validate_file_size(value):
     """Checks the size of the downloaded file."""
     if value.size > MAX_SIZE_KB * 1024:
-        raise ValidationError(
-            f"The file size cannot exceed {MAX_SIZE_KB}KB."
-        )
+        raise ValidationError(f"The file size cannot exceed {MAX_SIZE_KB}KB.")
