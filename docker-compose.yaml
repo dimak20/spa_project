@@ -78,9 +78,59 @@ services:
       retries: 5
     restart: always
 
+  redis-admin:
+    image: rediscommander/redis-commander:latest
+    ports:
+      - "8081:8081"
+    restart: always
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - redis
+    networks:
+      - spa
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8081 || exit 1" ]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    networks:
+      - spa
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-data:/var/lib/grafana
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+    networks:
+      - spa
+
 volumes:
   spa_db:
   my_media:
+  prometheus_data: { }
+  grafana-data: { }
 
 networks:
   spa:
