@@ -2,7 +2,7 @@ import re
 
 from django.core.exceptions import ValidationError
 
-MAX_AVATAR_SIZE_KB = 200
+MAX_AVATAR_SIZE_KB = 300
 
 
 def username_validator(value: str) -> None | ValidationError:
