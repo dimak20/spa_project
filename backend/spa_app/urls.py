@@ -26,3 +26,6 @@ urlpatterns = [
     path("api/v1/accounts/", include("accounts.urls", namespace="accounts")),
     path("api/v1/comments/", include("comments.urls", namespace="comments")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
