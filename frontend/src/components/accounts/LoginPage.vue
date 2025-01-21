@@ -22,7 +22,7 @@ export default {
   methods: {
     async handleLogin() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/api/v1/accounts/token/`, {
+        const response = await fetch(`${import.meta.env.VITE_APP_API_URL}api/v1/accounts/token/`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({username: this.username, password: this.password}),
