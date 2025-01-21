@@ -1,7 +1,7 @@
 <template>
   <div class="comment-item">
     <div class="comment-header">
-      <div v-if="comment.user.profile_image">
+      <div v-if="avatarUrl">
         <img :src="avatarUrl" alt="User Avatar" class="avatar"/>
       </div>
       <p>
@@ -86,6 +86,7 @@
 
 <script>
 import DOMPurify from "dompurify";
+import defaultAvatar from "@/assets/images/default_avatar.jpg";
 
 export default {
   props: {
@@ -99,18 +100,31 @@ export default {
       const apiUrl = import.meta.env.VITE_APP_API_URL;
       const profileImage = this.comment.user.profile_image;
 
-      const sanitizedProfileImage = profileImage && profileImage.startsWith('/')
+      if (!profileImage || profileImage.trim() === '' || profileImage === 'null') {
+        return defaultAvatar;
+      }
+
+      const sanitizedProfileImage = profileImage.startsWith('/')
           ? profileImage.slice(1)
           : profileImage;
 
       const sanitizedApiUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
 
-      return profileImage
-          ? `${sanitizedApiUrl}/${sanitizedProfileImage}`
-          : "default-avatar.jpg";
+      return `${sanitizedApiUrl}/${sanitizedProfileImage}`;
     },
     safeHtml() {
       return DOMPurify.sanitize(this.comment.text);
+    },
+    formattedDate() {
+      const date = new Date(this.comment.created_at); // предполагаем, что дата находится в `created_at`
+      const options = {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      };
+      return date.toLocaleDateString("en-US", options);
     },
   }
   ,
