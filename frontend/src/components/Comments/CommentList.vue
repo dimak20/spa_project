@@ -18,6 +18,15 @@
           <option value="-">Descending</option>
         </select>
       </div>
+      <!-- Filter form -->
+      <div>
+        <label for="filterUsername">Username:</label>
+        <input type="text" v-model="filterUsername" @input="fetchComments(currentPage)"
+               placeholder="Filter by username"/>
+
+        <label for="filterText">Text:</label>
+        <input type="text" v-model="filterText" @input="fetchComments(currentPage)" placeholder="Filter by text"/>
+      </div>
       <div v-if="loading">Loading...</div>
       <div v-else>
         <div v-if="comments.length">
@@ -67,6 +76,8 @@ export default {
       previousPage: null,
       sortField: 'date',
       sortOrder: 'desc',
+      filterUsername: '',
+      filterText: '',
     };
   },
   methods: {
@@ -78,7 +89,7 @@ export default {
     async fetchComments(page = 1) {
       this.loading = true;
       try {
-        const url = `${import.meta.env.VITE_APP_API_URL}api/v1/comments/?page=${page}&ordering=${this.sortOrder}${this.sortField}`;
+        const url = `${import.meta.env.VITE_APP_API_URL}api/v1/comments/?page=${page}&ordering=${this.sortOrder}${this.sortField}&username=${this.filterUsername}&text=${this.filterText}`;
         const response = await fetch(url);
         const data = await response.json();
 
