@@ -9,6 +9,7 @@ django-cors-headers==4.6.0
 django-filter==24.3
 djangorestframework==3.15.2
 djangorestframework_simplejwt==5.4.0
+Faker==33.3.1
 h11==0.14.0
 idna==3.10
 mypy-extensions==1.0.0
@@ -19,8 +20,10 @@ platformdirs==4.3.6
 psycopg==3.2.4
 psycopg-binary==3.2.4
 PyJWT==2.10.1
+python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 requests==2.32.3
+six==1.17.0
 sqlparse==0.5.3
 typing_extensions==4.12.2
 tzdata==2024.2
