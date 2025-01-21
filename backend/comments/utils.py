@@ -60,3 +60,7 @@ def submit_comment(request):
             return JsonResponse({"error": "Invalid reCAPTCHA"}, status=400)
 
         return JsonResponse({"message": "Comment submitted successfully"})
+
+
+def generate_key(request, *args, **kwargs):
+    return "comment_list"
