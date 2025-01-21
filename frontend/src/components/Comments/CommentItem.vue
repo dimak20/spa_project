@@ -96,21 +96,28 @@ export default {
   },
   computed: {
     avatarUrl() {
-      return this.comment.user.profile_image
-          ? `${import.meta.env.VITE_APP_API_URL}${this.comment.user.profile_image}`
+      const apiUrl = import.meta.env.VITE_APP_API_URL;
+      const profileImage = this.comment.user.profile_image;
+
+      const sanitizedProfileImage = profileImage && profileImage.startsWith('/')
+          ? profileImage.slice(1)
+          : profileImage;
+
+      const sanitizedApiUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+
+      return profileImage
+          ? `${sanitizedApiUrl}/${sanitizedProfileImage}`
           : "default-avatar.jpg";
-    },
-    formattedDate() {
-      const date = new Date(this.comment.created_at);
-      return date.toLocaleDateString() + " " + date.toLocaleTimeString();
     },
     safeHtml() {
       return DOMPurify.sanitize(this.comment.text);
     },
-  },
+  }
+  ,
   mounted() {
     this.siteKey = import.meta.env.VITE_SITE_KEY || '';
-  },
+  }
+  ,
   data() {
     return {
       showReplyForm: false,
@@ -120,15 +127,17 @@ export default {
       captchaVerified: false,
       captchaResponse: null,
       showRecaptcha: false,
-      siteKey: "6LcAVb0qAAAAABzMCwmfE7hBwfskC4lUTdTUEwwL",
+      siteKey: "",
     };
-  },
+  }
+  ,
   methods: {
     toggleReplyForm() {
       this.showReplyForm = !this.showReplyForm;
       this.captchaVerified = false; //
       this.showRecaptcha = false;  //
-    },
+    }
+    ,
     renderRecaptcha() {
       this.showRecaptcha = true;
 
@@ -147,18 +156,21 @@ export default {
           });
         }
       });
-    },
+    }
+    ,
     loadRecaptchaScript(callback) {
       const script = document.createElement("script");
       script.src = `https://www.google.com/recaptcha/api.js?render=explicit`;
       script.async = true;
       script.onload = callback;
       document.head.appendChild(script);
-    },
+    }
+    ,
     onCaptchaVerified(response) {
       this.captchaVerified = !!response; //
       this.captchaResponse = response;  //
-    },
+    }
+    ,
     async submitReply() {
       if (!this.replyText.trim() || !this.captchaVerified) return;
 
@@ -191,21 +203,25 @@ export default {
       } catch (error) {
         console.error("Error submitting reply:", error);
       }
-    },
+    }
+    ,
     handleNewReply(newReply) {
       if (!this.comment.replies) {
         this.$set(this.comment, "replies", []);
       }
       this.comment.replies.push(newReply);
-    },
+    }
+    ,
     openImage(imageUrl) {
       this.currentImage = imageUrl;
       this.isViewerVisible = true;
-    },
+    }
+    ,
     closeImage() {
       this.currentImage = null;
       this.isViewerVisible = false;
-    },
+    }
+    ,
     insertTag(openTag, closeTag) {
       const textarea = this.$refs.replyTextarea;
       if (!textarea) {
@@ -228,9 +244,12 @@ export default {
         const newPos = start + openTag.length;
         textarea.setSelectionRange(newPos, newPos + selectedText.length);
       });
-    },
-  },
-};
+    }
+    ,
+  }
+  ,
+}
+;
 </script>
 
 <style scoped>
