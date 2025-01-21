@@ -74,7 +74,9 @@ export default {
       formData.append('last_name', this.last_name);
       formData.append('email', this.email);
       formData.append('password', this.password);
-      formData.append('profile_image', this.profile_image);  // Add an avatar if it is selected
+      if (this.profile_image) {
+        formData.append('profile_image', this.profile_image);
+      }
 
       try {
         const response = await fetch(`${import.meta.env.VITE_APP_API_URL}api/v1/accounts/register/`, {
