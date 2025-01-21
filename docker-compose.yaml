@@ -62,6 +62,22 @@ services:
     networks:
       - spa
 
+  redis:
+    image: redis:7.0
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - spa
+    env_file:
+      - ./backend/.env
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+    restart: always
+
 volumes:
   spa_db:
   my_media:
