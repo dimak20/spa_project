@@ -1,0 +1,137 @@
+services:
+  spa_service:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "python manage.py wait_for_db &&
+            python manage.py makemigrations &&
+            python manage.py migrate &&
+            python manage.py collectstatic --noinput &&
+            uvicorn spa_app.asgi:application --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./backend:/app
+      - ./backend/files/media:/app/files/media
+      - ./backend/static:/app/static
+    depends_on:
+      - db
+    networks:
+      - spa
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./frontend/.env
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: [ "npm", "run", "dev", "--", "--host", "0.0.0.0" ]
+    networks:
+      - spa
+    depends_on:
+      - spa_service
+
+  db:
+    image: postgres:16.0-alpine3.17
+    restart: always
+    env_file:
+      - ./backend/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - spa_db:/var/lib/postgresql/data
+    networks:
+      - spa
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - spa_service
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./backend/staticfiles:/app/staticfiles
+      - ./backend/media:/app/media
+    networks:
+      - spa
+
+  redis:
+    image: redis:7.0
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - spa
+    env_file:
+      - ./backend/.env
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+    restart: always
+
+  redis-admin:
+    image: rediscommander/redis-commander:latest
+    ports:
+      - "8081:8081"
+    restart: always
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - redis
+    networks:
+      - spa
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8081 || exit 1" ]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    networks:
+      - spa
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana-data:/var/lib/grafana
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+    networks:
+      - spa
+
+volumes:
+  spa_db:
+  my_media:
+  prometheus_data: { }
+  grafana-data: { }
+
+networks:
+  spa:
+    driver: bridge
