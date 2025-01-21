@@ -1,0 +1,56 @@
+services:
+  spa_service:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "python manage.py wait_for_db &&
+            python manage.py makemigrations &&
+            python manage.py migrate &&
+            uvicorn spa_app.asgi:application --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./backend:/app
+      - ./backend/files/media:/app/files/media
+    depends_on:
+      - db
+    networks:
+      - spa
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./frontend/.env
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: [ "npm", "run", "dev", "--", "--host", "0.0.0.0" ]
+    networks:
+      - spa
+    depends_on:
+      - spa_service
+
+  db:
+    image: postgres:16.0-alpine3.17
+    restart: always
+    env_file:
+      - ./backend/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - spa_db:/var/lib/postgresql/data
+    networks:
+      - spa
+
+volumes:
+  spa_db:
+  my_media:
+
+networks:
+  spa:
+    driver: bridge
