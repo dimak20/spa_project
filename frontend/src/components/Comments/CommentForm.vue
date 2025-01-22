@@ -37,7 +37,10 @@
     <!-- reCAPTCHA (appears only before submitting) -->
     <div v-if="showRecaptcha" class="g-recaptcha" :data-sitekey="siteKey" ref="recaptcha"></div>
 
-    <button type="submit">Submit</button>
+    <!-- Button wrapper -->
+    <div>
+      <button type="submit">Submit</button>
+    </div>
   </form>
 </template>
 
@@ -183,6 +186,11 @@ button {
   border: none;
   padding: 10px;
   cursor: pointer;
+}
+
+button[type="submit"] {
+  display: block;
+  margin-top: 10px;
 }
 
 .error-message {
