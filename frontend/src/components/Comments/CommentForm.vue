@@ -98,7 +98,7 @@ export default {
     },
     onRecaptchaSuccess(token) {
       this.recaptchaToken = token;
-      console.log("reCAPTCHA verified", token);
+      console.log("reCAPTCHA verified");
       this.finalizeSubmission();
     },
     async submitComment() {
