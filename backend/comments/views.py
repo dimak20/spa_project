@@ -1,3 +1,5 @@
+import logging
+
 from django_filters.rest_framework.backends import DjangoFilterBackend
 from rest_framework import viewsets, mixins
 from rest_framework.exceptions import ValidationError
@@ -35,10 +37,11 @@ class CommentView(
         return super().list(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        recaptcha_token = self.request.data.get("captcha")
-        result = verify_recaptcha(recaptcha_token)
-        if not result.get("success"):
-            raise ValidationError("Invalid reCAPTCHA.")
+        # recaptcha_token = self.request.data.get("captcha")
+        # result = verify_recaptcha(recaptcha_token)
+        #
+        # if not result.get("success"):
+        #     return ValidationError("Invalid reCAPTCHA.")
         serializer.save(user=self.request.user)
 
     def get_queryset(self):

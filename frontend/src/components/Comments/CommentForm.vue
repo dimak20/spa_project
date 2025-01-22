@@ -117,16 +117,33 @@ export default {
           this.attached_image = null;
           this.attached_file = null;
           this.recaptchaToken = '';
-          this.showRecaptcha = false; // Hide the captcha after sending
-        } else if (response.status === 401) {
-          this.errorMessage = 'Unauthorized: Please log in to post a comment.';
-        } else if (response.status === 400) {
-          this.errorMessage = 'Bad request: Please check your input.';
+          this.showRecaptcha = false;
+          this.errorMessage = '';
         } else {
-          this.errorMessage = 'An unexpected error occurred. Please try again.';
+          let errorDetails = '';
+          try {
+            const errorResponse = await response.json();
+            if (errorResponse.detail) {
+              errorDetails = errorResponse.detail;
+            } else if (errorResponse.errors) {
+              errorDetails = `Validation errors: ${JSON.stringify(errorResponse.errors)}`;
+            }
+          } catch (jsonError) {
+            errorDetails = await response.text();
+          }
+
+          if (response.status === 401) {
+            this.errorMessage = errorDetails || 'Unauthorized: Please log in to post a comment.';
+          } else if (response.status === 400) {
+            this.errorMessage = errorDetails || 'Bad request: Please check your input.';
+          } else {
+            this.errorMessage = errorDetails || `Unexpected error: ${response.status} - ${response.statusText}`;
+          }
+
+          console.error(`Server responded with error: ${response.status} - ${response.statusText}`, errorDetails);
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Network error:', error);
         this.errorMessage = 'Network error: Unable to connect to the server.';
       }
     },
