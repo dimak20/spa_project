@@ -98,8 +98,6 @@ docker-compose up --build
 
 5. Access the API at http://localhost
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 6. Monitoring
 ```shell

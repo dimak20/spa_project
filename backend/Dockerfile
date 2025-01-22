@@ -19,5 +19,8 @@ RUN adduser \
 RUN chown -R my_user /files/media
 RUN chmod -R 755 /files/media
 
+RUN python manage.py collectstatic --noinput || true
 
 USER my_user
+
+CMD ["uvicorn", "spa_app.asgi:application", "--host", "0.0.0.0", "--port", "8000"]

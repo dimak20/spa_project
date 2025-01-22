@@ -126,12 +126,10 @@ export default {
       };
       return date.toLocaleDateString("en-US", options);
     },
-  }
-  ,
+  },
   mounted() {
     this.siteKey = import.meta.env.VITE_SITE_KEY || '';
-  }
-  ,
+  },
   data() {
     return {
       showReplyForm: false,
@@ -143,15 +141,13 @@ export default {
       showRecaptcha: false,
       siteKey: "",
     };
-  }
-  ,
+  },
   methods: {
     toggleReplyForm() {
       this.showReplyForm = !this.showReplyForm;
       this.captchaVerified = false; //
       this.showRecaptcha = false;  //
-    }
-    ,
+    },
     renderRecaptcha() {
       this.showRecaptcha = true;
 
@@ -170,21 +166,18 @@ export default {
           });
         }
       });
-    }
-    ,
+    },
     loadRecaptchaScript(callback) {
       const script = document.createElement("script");
       script.src = `https://www.google.com/recaptcha/api.js?render=explicit`;
       script.async = true;
       script.onload = callback;
       document.head.appendChild(script);
-    }
-    ,
+    },
     onCaptchaVerified(response) {
       this.captchaVerified = !!response; //
       this.captchaResponse = response;  //
-    }
-    ,
+    },
     async submitReply() {
       if (!this.replyText.trim() || !this.captchaVerified) return;
 
@@ -204,38 +197,35 @@ export default {
               }),
             }
         );
-
         if (response.ok) {
           const newReply = await response.json();
-          this.$emit("new-reply", newReply);
           this.replyText = "";
           this.showReplyForm = false;
           this.showRecaptcha = false;
+
+          this.$parent.fetchComments(this.$parent.currentPage);
+
         } else {
           console.error("Failed to submit reply");
         }
       } catch (error) {
         console.error("Error submitting reply:", error);
       }
-    }
-    ,
+    },
     handleNewReply(newReply) {
       if (!this.comment.replies) {
         this.$set(this.comment, "replies", []);
       }
       this.comment.replies.push(newReply);
-    }
-    ,
+    },
     openImage(imageUrl) {
       this.currentImage = imageUrl;
       this.isViewerVisible = true;
-    }
-    ,
+    },
     closeImage() {
       this.currentImage = null;
       this.isViewerVisible = false;
-    }
-    ,
+    },
     insertTag(openTag, closeTag) {
       const textarea = this.$refs.replyTextarea;
       if (!textarea) {
@@ -258,12 +248,9 @@ export default {
         const newPos = start + openTag.length;
         textarea.setSelectionRange(newPos, newPos + selectedText.length);
       });
-    }
-    ,
-  }
-  ,
-}
-;
+    },
+  },
+};
 </script>
 
 <style scoped>
