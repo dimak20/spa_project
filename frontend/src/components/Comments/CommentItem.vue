@@ -96,28 +96,26 @@ export default {
     },
   },
   computed: {
-avatarUrl() {
-  const apiUrl = import.meta.env.VITE_APP_API_URL;
-  const profileImage = this.comment.user.profile_image;
+    avatarUrl() {
+      const apiUrl = import.meta.env.VITE_APP_API_URL;
+      const profileImage = this.comment.user.profile_image;
 
-  if (!profileImage || profileImage.trim() === '' || profileImage === 'null') {
-    return defaultAvatar;
-  }
+      if (!profileImage || profileImage.trim() === '' || profileImage === 'null') {
+        return defaultAvatar;
+      }
 
-  // Если profileImage уже содержит абсолютный URL, возвращаем его как есть
-  if (profileImage.startsWith('http://') || profileImage.startsWith('https://')) {
-    return profileImage;
-  }
+      if (profileImage.startsWith('http://') || profileImage.startsWith('https://')) {
+        return profileImage;
+      }
 
-  // Иначе обрабатываем как относительный путь
-  const sanitizedProfileImage = profileImage.startsWith('/')
-    ? profileImage.slice(1)
-    : profileImage;
+      const sanitizedProfileImage = profileImage.startsWith('/')
+          ? profileImage.slice(1)
+          : profileImage;
 
-  const sanitizedApiUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+      const sanitizedApiUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
 
-  return `${sanitizedApiUrl}/${sanitizedProfileImage}`;
-},
+      return `${sanitizedApiUrl}/${sanitizedProfileImage}`;
+    },
     safeHtml() {
       return DOMPurify.sanitize(this.comment.text);
     },
