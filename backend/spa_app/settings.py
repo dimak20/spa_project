@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django_filters",
     "corsheaders",
     "django_extensions",
+    "storages",
     # "django_prometheus",
     # my_apps
     "comments",
@@ -179,6 +180,22 @@ else:
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
             "LOCATION": "unique-snowflake",
         }
+    }
+
+USE_AWS = os.getenv("USE_AWS", "false").lower() == "true"
+if USE_AWS:
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "eu-north-1")
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+    STORAGES = {
+        "default": {"BACKEND": "storages.backends.s3boto3.S3StaticStorage"},
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
     }
 
 REST_FRAMEWORK = {
