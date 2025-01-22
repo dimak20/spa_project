@@ -30,7 +30,7 @@ class CommentView(
 
         return CommentSerializer
 
-    # @cache_response(60 * 3, key_func=generate_key)
+    @cache_response(60 * 3, key_func=generate_key)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 

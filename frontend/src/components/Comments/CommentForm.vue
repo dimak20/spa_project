@@ -25,21 +25,21 @@
     <!-- Photo upload field -->
     <label>
       Upload Photo:
-      <input type="file" @change="handlePhotoUpload" accept="image/*"/>
+      <input type="file" ref="imageInput" @change="handlePhotoUpload" accept="image/*"/>
     </label>
 
     <!-- Field for uploading a text file -->
     <label>
       Upload Text File:
-      <input type="file" @change="handleFileUpload" accept=".txt"/>
+      <input type="file" ref="fileInput" @change="handleFileUpload" accept=".txt"/>
     </label>
 
     <!-- reCAPTCHA -->
     <div
-      v-if="showRecaptcha"
-      ref="recaptcha"
-      id="recaptcha-container"
-      class="g-recaptcha">
+        v-if="showRecaptcha"
+        ref="recaptcha"
+        id="recaptcha-container"
+        class="g-recaptcha">
     </div>
 
     <!-- Button wrapper -->
@@ -138,8 +138,8 @@ export default {
         });
 
         if (response.ok) {
-          this.$emit("new-comment");
           this.resetForm();
+          this.$emit("new-comment");
         } else {
           this.handleError(response);
         }
@@ -156,33 +156,40 @@ export default {
       this.recaptchaToken = "";
       this.showRecaptcha = false;
       this.errorMessage = "";
-    },
-async handleError(response) {
-  try {
-    const errorResponse = await response.json();
 
-    if (response.status === 400) {
-      if (errorResponse.errors || errorResponse) {
-        const validationErrors = Object.entries(errorResponse)
-          .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
-          .join("; ");
-        this.errorMessage = `Validation errors: ${validationErrors}`;
-      } else if (errorResponse.detail) {
-        this.errorMessage = errorResponse.detail;
-      } else {
-        this.errorMessage = "Bad request: Please check your input.";
+      if (this.$refs.fileInput) {
+        this.$refs.fileInput.value = "";
       }
-    } else if (response.status === 401) {
-      this.errorMessage = "Unauthorized: Please log in to post a comment.";
-    } else {
-      this.errorMessage = `Unexpected error: ${response.status} - ${response.statusText}`;
-    }
-  } catch (jsonError) {
-    const errorText = await response.text();
-    this.errorMessage = errorText || `Unexpected error: ${response.status}`;
-  }
-  console.error(`Error ${response.status}:`, this.errorMessage);
-},
+      if (this.$refs.imageInput) {
+        this.$refs.imageInput.value = "";
+      }
+    },
+    async handleError(response) {
+      try {
+        const errorResponse = await response.json();
+
+        if (response.status === 400) {
+          if (errorResponse.errors || errorResponse) {
+            const validationErrors = Object.entries(errorResponse)
+                .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+                .join("; ");
+            this.errorMessage = `Validation errors: ${validationErrors}`;
+          } else if (errorResponse.detail) {
+            this.errorMessage = errorResponse.detail;
+          } else {
+            this.errorMessage = "Bad request: Please check your input.";
+          }
+        } else if (response.status === 401) {
+          this.errorMessage = "Unauthorized: Please log in to post a comment.";
+        } else {
+          this.errorMessage = `Unexpected error: ${response.status} - ${response.statusText}`;
+        }
+      } catch (jsonError) {
+        const errorText = await response.text();
+        this.errorMessage = errorText || `Unexpected error: ${response.status}`;
+      }
+      console.error(`Error ${response.status}:`, this.errorMessage);
+    },
     insertTag(openTag, closeTag) {
       const textarea = this.$refs.commentTextarea;
       const start = textarea.selectionStart;
