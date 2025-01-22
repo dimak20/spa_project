@@ -1,5 +1,3 @@
-import logging
-
 from django_filters.rest_framework.backends import DjangoFilterBackend
 from rest_framework import viewsets, mixins
 from rest_framework.exceptions import ValidationError
