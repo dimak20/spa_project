@@ -34,8 +34,13 @@
       <input type="file" @change="handleFileUpload" accept=".txt"/>
     </label>
 
-    <!-- reCAPTCHA (appears only before submitting) -->
-    <div v-if="showRecaptcha" class="g-recaptcha" :data-sitekey="siteKey" ref="recaptcha"></div>
+    <!-- reCAPTCHA -->
+    <div
+      v-if="showRecaptcha"
+      ref="recaptcha"
+      id="recaptcha-container"
+      class="g-recaptcha">
+    </div>
 
     <!-- Button wrapper -->
     <div>
@@ -48,18 +53,30 @@
 export default {
   data() {
     return {
-      text: '',
-      home_page: '',
+      text: "",
+      home_page: "",
       attached_image: null,
       attached_file: null,
-      errorMessage: '',
-      recaptchaToken: '', // Token reCAPTCHA
-      siteKey: "",
-      showRecaptcha: false, // Flag that controls the display of reCAPTCHA
+      errorMessage: "",
+      recaptchaToken: "", // Token reCAPTCHA
+      siteKey: "", // reCAPTCHA site key
+      showRecaptcha: false, // Flag to control the display of reCAPTCHA
     };
   },
   mounted() {
-    this.siteKey = import.meta.env.VITE_SITE_KEY || '';
+    this.siteKey = import.meta.env.VITE_SITE_KEY || "";
+
+    // Ensure reCAPTCHA script is loaded
+    const script = document.createElement("script");
+    script.src = "https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit";
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    // Define global callback
+    window.onloadCallback = () => {
+      console.log("reCAPTCHA script loaded");
+    };
   },
   methods: {
     handlePhotoUpload(event) {
@@ -68,87 +85,100 @@ export default {
     handleFileUpload(event) {
       this.attached_file = event.target.files[0];
     },
-    onRecaptchaChange(token) {
+    renderRecaptcha() {
+      if (window.grecaptcha && this.$refs.recaptcha) {
+        window.grecaptcha.render(this.$refs.recaptcha, {
+          sitekey: this.siteKey,
+          callback: this.onRecaptchaSuccess,
+        });
+        console.log("reCAPTCHA rendered");
+      } else {
+        console.error("reCAPTCHA placeholder not available or grecaptcha not loaded");
+      }
+    },
+    onRecaptchaSuccess(token) {
       this.recaptchaToken = token;
+      console.log("reCAPTCHA verified", token);
+      this.finalizeSubmission();
     },
     async submitComment() {
-      this.errorMessage = '';
+      this.errorMessage = "";
 
-      // Show reCAPTCHA before sending
-      this.showRecaptcha = true;
-
-      // We initialize reCAPTCHA only before sending
-      if (window.grecaptcha && !this.recaptchaToken) {
-        grecaptcha.render(this.$refs.recaptcha, {
-          sitekey: this.siteKey,
-          callback: this.onRecaptchaChange,
-        });
-      }
-
-      // reCAPTCHA token verification
       if (!this.recaptchaToken) {
-        this.errorMessage = 'Please complete the CAPTCHA verification.';
+        this.showRecaptcha = true;
+        this.$nextTick(() => {
+          this.renderRecaptcha();
+        });
         return;
       }
 
+      this.finalizeSubmission();
+    },
+    async finalizeSubmission() {
       const formData = new FormData();
-      formData.append('text', this.text);
+      formData.append("text", this.text);
       if (this.home_page) {
-        formData.append('home_page', this.home_page);
+        formData.append("home_page", this.home_page);
       }
       if (this.attached_image) {
-        formData.append('attached_image', this.attached_image);
+        formData.append("attached_image", this.attached_image);
       }
       if (this.attached_file) {
-        formData.append('attached_file', this.attached_file);
+        formData.append("attached_file", this.attached_file);
       }
-      formData.append('captcha', this.recaptchaToken); //
+      formData.append("captcha", this.recaptchaToken);
 
       try {
         const response = await fetch(`${import.meta.env.VITE_APP_API_URL}api/v1/comments/`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
           body: formData,
         });
 
         if (response.ok) {
-          this.$emit('new-comment');
-          this.text = '';
-          this.home_page = '';
-          this.attached_image = null;
-          this.attached_file = null;
-          this.recaptchaToken = '';
-          this.showRecaptcha = false;
-          this.errorMessage = '';
+          this.$emit("new-comment");
+          this.resetForm();
         } else {
-          let errorDetails = '';
-          try {
-            const errorResponse = await response.json();
-            if (errorResponse.detail) {
-              errorDetails = errorResponse.detail;
-            } else if (errorResponse.errors) {
-              errorDetails = `Validation errors: ${JSON.stringify(errorResponse.errors)}`;
-            }
-          } catch (jsonError) {
-            errorDetails = await response.text();
-          }
-
-          if (response.status === 401) {
-            this.errorMessage = errorDetails || 'Unauthorized: Please log in to post a comment.';
-          } else if (response.status === 400) {
-            this.errorMessage = errorDetails || 'Bad request: Please check your input.';
-          } else {
-            this.errorMessage = errorDetails || `Unexpected error: ${response.status} - ${response.statusText}`;
-          }
-
-          console.error(`Server responded with error: ${response.status} - ${response.statusText}`, errorDetails);
+          this.handleError(response);
         }
       } catch (error) {
-        console.error('Network error:', error);
-        this.errorMessage = 'Network error: Unable to connect to the server.';
+        console.error("Network error:", error);
+        this.errorMessage = "Network error: Unable to connect to the server.";
       }
+    },
+    resetForm() {
+      this.text = "";
+      this.home_page = "";
+      this.attached_image = null;
+      this.attached_file = null;
+      this.recaptchaToken = "";
+      this.showRecaptcha = false;
+      this.errorMessage = "";
+    },
+    async handleError(response) {
+      let errorDetails = "";
+      try {
+        const errorResponse = await response.json();
+        if (errorResponse.detail) {
+          errorDetails = errorResponse.detail;
+        } else if (errorResponse.errors) {
+          errorDetails = `Validation errors: ${JSON.stringify(errorResponse.errors)}`;
+        }
+      } catch (jsonError) {
+        errorDetails = await response.text();
+      }
+
+      if (response.status === 401) {
+        this.errorMessage = errorDetails || "Unauthorized: Please log in to post a comment.";
+      } else if (response.status === 400) {
+        this.errorMessage = errorDetails || "Bad request: Please check your input.";
+      } else {
+        this.errorMessage = errorDetails || `Unexpected error: ${response.status} - ${response.statusText}`;
+      }
+
+      console.error(`Server responded with error: ${response.status}`, errorDetails);
     },
     insertTag(openTag, closeTag) {
       const textarea = this.$refs.commentTextarea;
