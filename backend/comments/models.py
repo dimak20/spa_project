@@ -51,6 +51,7 @@ class Comment(models.Model):
         ordering = ["-created_at"]
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
         if self.attached_image:
             resize_image(self.attached_image)
+        super().save(*args, **kwargs)
+

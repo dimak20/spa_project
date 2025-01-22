@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import uuid
@@ -5,7 +6,7 @@ import uuid
 import requests
 from PIL import Image
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import JsonResponse
 from django.utils.text import slugify
 
@@ -28,16 +29,26 @@ def comment_text_file_path(instance, filename: str) -> os.path:
 
 
 def resize_image(image):
-    image_path = image.path
-    try:
-        image = Image.open(image_path)
+    if not image:
+        return
 
-        if image.width > MAX_IMAGE_WIDTH or image.height > MAX_IMAGE_HEIGHT:
-            output_size = (MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT)
-            image.thumbnail(output_size)
-            image.save(image_path)
-    except Exception as e:
-        raise ValidationError(f"Failed to process the image: {e}")
+    img = Image.open(image)
+
+    img.thumbnail((MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT))
+
+    img_io = io.BytesIO()
+    img.save(img_io, format=img.format)
+
+    img_io.seek(0)
+
+    image.file = InMemoryUploadedFile(
+        img_io,
+        None,
+        image.name,
+        f"image/{img.format.lower()}",
+        img_io.tell(),
+        None,
+    )
 
 
 def verify_recaptcha(token):
