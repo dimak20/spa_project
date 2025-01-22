@@ -19,6 +19,7 @@ RUN adduser \
 RUN chown -R my_user /files/media
 RUN chmod -R 755 /files/media
 
+RUN python manage.py collectstatic --noinput
 
 USER my_user
 
