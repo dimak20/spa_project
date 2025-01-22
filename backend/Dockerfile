@@ -9,7 +9,6 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 COPY . /app
-COPY .env /app/.en
 RUN mkdir -p /files/media
 
 RUN adduser \
@@ -19,8 +18,6 @@ RUN adduser \
 
 RUN chown -R my_user /files/media
 RUN chmod -R 755 /files/media
-
-ENV DJANGO_SETTINGS_MODULE=spa_app.settings
 
 RUN python manage.py collectstatic --noinput || true
 
