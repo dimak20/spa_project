@@ -98,7 +98,7 @@ export default {
     },
     onRecaptchaSuccess(token) {
       this.recaptchaToken = token;
-      console.log("reCAPTCHA verified", token);
+      console.log("reCAPTCHA verified");
       this.finalizeSubmission();
     },
     async submitComment() {
@@ -157,29 +157,32 @@ export default {
       this.showRecaptcha = false;
       this.errorMessage = "";
     },
-    async handleError(response) {
-      let errorDetails = "";
-      try {
-        const errorResponse = await response.json();
-        if (errorResponse.detail) {
-          errorDetails = errorResponse.detail;
-        } else if (errorResponse.errors) {
-          errorDetails = `Validation errors: ${JSON.stringify(errorResponse.errors)}`;
-        }
-      } catch (jsonError) {
-        errorDetails = await response.text();
-      }
+async handleError(response) {
+  try {
+    const errorResponse = await response.json();
 
-      if (response.status === 401) {
-        this.errorMessage = errorDetails || "Unauthorized: Please log in to post a comment.";
-      } else if (response.status === 400) {
-        this.errorMessage = errorDetails || "Bad request: Please check your input.";
+    if (response.status === 400) {
+      if (errorResponse.errors || errorResponse) {
+        const validationErrors = Object.entries(errorResponse)
+          .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+          .join("; ");
+        this.errorMessage = `Validation errors: ${validationErrors}`;
+      } else if (errorResponse.detail) {
+        this.errorMessage = errorResponse.detail;
       } else {
-        this.errorMessage = errorDetails || `Unexpected error: ${response.status} - ${response.statusText}`;
+        this.errorMessage = "Bad request: Please check your input.";
       }
-
-      console.error(`Server responded with error: ${response.status}`, errorDetails);
-    },
+    } else if (response.status === 401) {
+      this.errorMessage = "Unauthorized: Please log in to post a comment.";
+    } else {
+      this.errorMessage = `Unexpected error: ${response.status} - ${response.statusText}`;
+    }
+  } catch (jsonError) {
+    const errorText = await response.text();
+    this.errorMessage = errorText || `Unexpected error: ${response.status}`;
+  }
+  console.error(`Error ${response.status}:`, this.errorMessage);
+},
     insertTag(openTag, closeTag) {
       const textarea = this.$refs.commentTextarea;
       const start = textarea.selectionStart;

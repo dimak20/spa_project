@@ -25,7 +25,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/accounts/", include("accounts.urls", namespace="accounts")),
     path("api/v1/comments/", include("comments.urls", namespace="comments")),
-    # path("prometheus/", include("django_prometheus.urls")),
+    path("prometheus/", include("django_prometheus.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
