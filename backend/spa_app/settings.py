@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "django_filters",
     "corsheaders",
     "django_extensions",
-    "django_prometheus",
+    # "django_prometheus",
     # my_apps
     "comments",
     "accounts",
