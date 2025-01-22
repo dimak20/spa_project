@@ -21,3 +21,5 @@ RUN chmod -R 755 /files/media
 
 
 USER my_user
+
+CMD ["uvicorn", "spa_app.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
