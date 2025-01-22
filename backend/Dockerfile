@@ -9,6 +9,7 @@ COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 COPY . /app
+COPY .env /app/.en
 RUN mkdir -p /files/media
 
 RUN adduser \
