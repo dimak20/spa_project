@@ -19,7 +19,9 @@ RUN adduser \
 RUN chown -R my_user /files/media
 RUN chmod -R 755 /files/media
 
-RUN python manage.py collectstatic --noinput
+ENV DJANGO_SETTINGS_MODULE=spa_app.settings
+
+RUN python manage.py collectstatic --noinput || true
 
 USER my_user
 
