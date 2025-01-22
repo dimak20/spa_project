@@ -104,6 +104,10 @@ export default {
         return defaultAvatar;
       }
 
+      if (profileImage.startsWith('http://') || profileImage.startsWith('https://')) {
+        return profileImage;
+      }
+
       const sanitizedProfileImage = profileImage.startsWith('/')
           ? profileImage.slice(1)
           : profileImage;
@@ -116,7 +120,7 @@ export default {
       return DOMPurify.sanitize(this.comment.text);
     },
     formattedDate() {
-      const date = new Date(this.comment.created_at); // предполагаем, что дата находится в `created_at`
+      const date = new Date(this.comment.created_at);
       const options = {
         year: "numeric",
         month: "long",
